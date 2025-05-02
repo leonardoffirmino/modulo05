@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template, request, send_file
+from flask_socketio import SocketIO
 from repository.database import db
 from db_Models.payment import Payment
 from datetime import datetime, timedelta
@@ -8,6 +9,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'SECRET_KEY_WEBSOCKET'
 db.init_app(app)
+socketio = SocketIO(app)
 
 @app.route('/payments/pix', methods=['POST'])
 def crete_payments_pix():
@@ -49,5 +51,16 @@ def payment_pix_page(payment_id):
                            host="http://127.0.0.1:5000",
                            qr_code=payment.qrcode
                            )
+
+#Section web socket
+@socketio.on('connect')
+def handle_connect():
+  print("Client connected!")
+
+
+
+
+
 if __name__ == '__main__':
-  app.run(debug=True)
+  socketio.run(app,debug=True)
+  
