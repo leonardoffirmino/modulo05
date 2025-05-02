@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, render_template, request, send_file
 from repository.database import db
 from db_Models.payment import Payment
 from datetime import datetime, timedelta
@@ -31,7 +31,7 @@ def crete_payments_pix():
   return jsonify({"message": "The Payment has been created!",
                   "Payment": new_payment.to_dict()})
 
-@app.route('/payments/pix/qrcode/<file_name>', methods=['GET'])
+@app.route('/payments/pix/qr_code/<file_name>', methods=['GET'])
 def get_image(file_name):
   return send_file(f"static/img/{file_name}.png",mimetype='image/png')
  
@@ -40,8 +40,14 @@ def pix_confirmation():
   return jsonify({"message": "The Payment has been confirmed!"})
 
 @app.route('/payments/pix/<int:payment_id>', methods=['GET'])
-def payments_pix_page(payment_id):
-  return "Pagamento Pix!"
+def payment_pix_page(payment_id):
+    payment = Payment.query.get(payment_id)
 
+    return render_template('payment.html',
+                           payment_id=payment.id,
+                           value=payment.value,
+                           host="http://127.0.0.1:5000",
+                           qr_code=payment.qrcode
+                           )
 if __name__ == '__main__':
   app.run(debug=True)
