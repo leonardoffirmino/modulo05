@@ -49,7 +49,7 @@ def pix_confirmation():
   #payment
   payment = Payment.query.filter_by(bank_payment_id=data.get("bank_payment_id")).first()
 
-  if not payment:
+  if not payment or payment.paid:
     return jsonify({"message": "Payment not found"}),404
   
   if data.get("value") != payment.value:
@@ -57,6 +57,7 @@ def pix_confirmation():
 
   payment.paid = True
   db.session.commit()
+  socketio.emit(f"payment-confirmed-{payment.id}")
   
   return jsonify({"message": "The Payment has been confirmed!"})
 
@@ -64,6 +65,10 @@ def pix_confirmation():
 def payment_pix_page(payment_id):
     payment = Payment.query.get(payment_id)
 
+    if payment.paid:
+      return render_template('confirmed_payment.html',
+                              payment_id=payment.id,
+                              value=payment.value)
     return render_template('payment.html',
                            payment_id=payment.id,
                            value=payment.value,

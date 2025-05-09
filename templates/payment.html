@@ -85,6 +85,10 @@
       socket.on("connect", () => {
         console.log("Client answer websocket");
       });
+      socket.on("payment-confirmed-{{payment_id}}", () => {
+        console.log("Payment - Confirmed");
+        location.reload();
+      });
     </script>
   </body>
 </html>
